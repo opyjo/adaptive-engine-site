@@ -1,0 +1,270 @@
+openapi: 3.1.0
+info:
+  title: Adaptive Engine API
+  version: 1.0.0
+  description: >-
+    Multi-tenant adaptive item selection for server-to-server integrations.
+    Learner identifiers must be opaque and pseudonymous. Content and answer keys
+    remain in the tenant application.
+servers:
+  - url: https://adaptive-engine-production-bfa6.up.railway.app
+security:
+  - bearerApiKey: []
+paths:
+  /health/live:
+    get:
+      security: []
+      operationId: healthLive
+      responses:
+        "200":
+          description: Process is running
+  /health/ready:
+    get:
+      security: []
+      operationId: healthReady
+      responses:
+        "200":
+          description: Service and database are ready
+        "503":
+          description: Database is unavailable
+  /v1/items/{id}:
+    parameters:
+      - $ref: "#/components/parameters/ItemId"
+    put:
+      operationId: upsertItem
+      summary: Create or replace item metadata
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ItemInput"
+      responses:
+        "200":
+          description: Metadata accepted
+    delete:
+      operationId: deactivateItem
+      summary: Deactivate an item without deleting its learning history
+      responses:
+        "204":
+          description: Item deactivated
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /v1/items/bulk:
+    post:
+      operationId: bulkUpsertItems
+      summary: Create or replace up to 1,000 metadata records
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [items]
+              properties:
+                items:
+                  type: array
+                  minItems: 1
+                  maxItems: 1000
+                  items:
+                    allOf:
+                      - $ref: "#/components/schemas/ItemInput"
+                      - type: object
+                        required: [itemId]
+                        properties:
+                          itemId:
+                            $ref: "#/components/schemas/ExternalId"
+      responses:
+        "200":
+          description: Batch accepted atomically
+  /v1/learners/{learnerId}/events:
+    parameters:
+      - $ref: "#/components/parameters/LearnerId"
+    post:
+      operationId: recordAnswerEvent
+      summary: Record one tenant-graded correct or incorrect outcome
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [idempotencyKey, itemId, correct]
+              properties:
+                idempotencyKey:
+                  type: string
+                  minLength: 8
+                  maxLength: 200
+                itemId:
+                  $ref: "#/components/schemas/ExternalId"
+                correct:
+                  type: boolean
+                occurredAt:
+                  type: string
+                  format: date-time
+      responses:
+        "201":
+          description: Event recorded and mastery updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnswerResult"
+        "200":
+          description: Existing result returned for an idempotent retry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnswerResult"
+  /v1/learners/{learnerId}/next-item:
+    parameters:
+      - $ref: "#/components/parameters/LearnerId"
+      - name: skillScope
+        in: query
+        description: Optional comma-separated allowlist of eligible skill keys
+        schema:
+          type: string
+      - name: gradeBand
+        in: query
+        schema:
+          type: string
+      - name: excludeRecent
+        in: query
+        schema:
+          type: boolean
+          default: true
+    get:
+      operationId: nextItem
+      summary: Select the best eligible item for a learner
+      responses:
+        "200":
+          description: Recommendation decision
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SelectionResult"
+        "404":
+          description: No eligible active item
+  /v1/learners/{learnerId}/mastery:
+    parameters:
+      - $ref: "#/components/parameters/LearnerId"
+    get:
+      operationId: learnerMastery
+      summary: Return the tenant-scoped learner skill profile
+      responses:
+        "200":
+          description: Learner mastery profile
+  /v1/tenants/self/skills/summary:
+    get:
+      operationId: tenantSkillSummary
+      summary: Aggregate learner state by skill for the authenticated tenant
+      responses:
+        "200":
+          description: Tenant-level skill summary
+components:
+  securitySchemes:
+    bearerApiKey:
+      type: http
+      scheme: bearer
+      bearerFormat: ae_live_xxx
+  parameters:
+    ItemId:
+      name: id
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/ExternalId"
+    LearnerId:
+      name: learnerId
+      in: path
+      required: true
+      description: Stable, opaque tenant identifier—not a name, email, or auth token
+      schema:
+        $ref: "#/components/schemas/ExternalId"
+  schemas:
+    ExternalId:
+      type: string
+      minLength: 1
+      maxLength: 200
+    ItemInput:
+      type: object
+      additionalProperties: false
+      required: [skill]
+      properties:
+        skill:
+          type: string
+          minLength: 1
+          maxLength: 240
+        difficulty:
+          type: integer
+          minimum: 1
+          maximum: 5
+          default: 3
+        difficultySource:
+          type: string
+          enum: [default, tenant]
+          default: default
+        gradeBand:
+          type: [string, "null"]
+        tags:
+          type: array
+          maxItems: 50
+          items:
+            type: string
+        active:
+          type: boolean
+          default: true
+    AnswerResult:
+      type: object
+      required: [eventId, skill, mastery, attempts, replayed, algorithmVersion]
+      properties:
+        eventId:
+          type: string
+          format: uuid
+        skill:
+          type: string
+        mastery:
+          type: number
+          minimum: 0
+          maximum: 1
+        attempts:
+          type: integer
+        replayed:
+          type: boolean
+        algorithmVersion:
+          type: string
+    SelectionResult:
+      type: object
+      required: [decisionId, itemId, skill, reason, algorithmVersion]
+      properties:
+        decisionId:
+          type: string
+          format: uuid
+        itemId:
+          $ref: "#/components/schemas/ExternalId"
+        skill:
+          type: string
+        reason:
+          type: string
+          enum: [weakest-skill, scaffold, spiral-review, fallback]
+        algorithmVersion:
+          type: string
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+        requestId:
+          type: string
+  responses:
+    NotFound:
+      description: Resource not found within the authenticated tenant
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"

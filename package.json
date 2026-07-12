@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "sync:openapi": "node scripts/sync-openapi.mjs"
   },
   "dependencies": {
     "next": "16.2.10",
