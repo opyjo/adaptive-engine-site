@@ -1,227 +1,111 @@
 import Link from "next/link";
-import { ArchitectureDiagram } from "@/components/architecture-diagram";
+import { AdaptiveDemo } from "@/components/adaptive-demo";
 import { CodeBlock } from "@/components/code-block";
-import {
-  healthSnippet,
-  nextItemSnippet,
-  postEventSnippet,
-  putItemSnippet,
-} from "@/lib/snippets";
+import { nextItemSnippet } from "@/lib/snippets";
 
-const LOOP_STEPS = [
-  { step: "1", text: "Your app asks the engine for the next item for a learner." },
-  { step: "2", text: "The learner answers; your app grades the answer itself." },
-  { step: "3", text: "Your app reports only correct or incorrect back to the engine." },
-  { step: "4", text: "The engine updates its per-skill mastery estimate — the next recommendation adapts." },
+const audiences = [
+  { number: "01", title: "EdTech products", text: "Add adaptive sequencing to an existing learning experience without building a learner-modelling team." },
+  { number: "02", title: "Tutoring platforms", text: "Turn between-session practice into a targeted loop and surface useful skill signals for instructors." },
+  { number: "03", title: "Assessment tools", text: "Select relevant items from your bank while preserving your grading rules, content, and reporting workflow." },
+  { number: "04", title: "Training systems", text: "Personalize certification and professional learning paths using the same content-agnostic decision layer." },
 ];
 
-const FEATURES = [
-  {
-    emoji: "🏢",
-    title: "Multi-tenant",
-    text: "Each customer has its own API keys and structurally isolated data — every database key and index leads with the tenant.",
-  },
-  {
-    emoji: "📦",
-    title: "Content-agnostic",
-    text: "The engine never sees question text, choices, media, or answer keys. Only metadata: item ID, skill key, difficulty 1–5, grade band, tags.",
-  },
-  {
-    emoji: "🔒",
-    title: "Privacy-first",
-    text: "No names, emails, or birthdates — only opaque learner IDs you generate. That keeps the engine outside most PII compliance blast radii.",
-  },
-  {
-    emoji: "📋",
-    title: "Auditable",
-    text: "Answer events and selection decisions are append-only and versioned by algorithm. “Why was this recommended?” always has a recorded answer.",
-  },
-];
-
-const ENDPOINTS = [
-  ["PUT /v1/items/{id}", "Create or replace one item's metadata"],
-  ["POST /v1/items/bulk", "Upsert up to 1,000 items atomically"],
-  ["DELETE /v1/items/{id}", "Deactivate an item (history preserved)"],
-  ["GET /v1/learners/{id}/next-item", "Recommend the next item, with skill/grade filters"],
-  ["POST /v1/learners/{id}/events", "Record one graded outcome; returns updated mastery"],
-  ["GET /v1/learners/{id}/mastery", "The learner's full skill profile"],
-  ["GET /v1/tenants/self/skills/summary", "Aggregate skill stats for your whole tenant"],
+const capabilities = [
+  { code: "MODEL", title: "Per-skill mastery", text: "Maintain an evolving estimate for each learner and skill. Difficulty-weighted updates respond to every outcome." },
+  { code: "SELECT", title: "Next-item policy", text: "Target gaps, scaffold repeated mistakes, match difficulty, avoid repetition, and schedule spiral review." },
+  { code: "TRACE", title: "Explainable decisions", text: "Record the reason, algorithm version, candidate count, and mastery context behind each selection." },
+  { code: "ISOLATE", title: "Multi-tenant by design", text: "Every credential, item, learner state, event, and database lookup is scoped to the authenticated tenant." },
+  { code: "RETRY", title: "Safe event delivery", text: "Idempotency keys make answer-event retries safe, so a network timeout cannot update mastery twice." },
+  { code: "BOUNDARY", title: "Minimal data surface", text: "Send opaque learner IDs, item metadata, and outcomes. Keep question text, answer keys, and direct identity." },
 ];
 
 export default function Home() {
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 sm:px-6">
-      {/* Hero */}
-      <section className="py-16 text-center sm:py-24">
-        <p className="mb-4 inline-block rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1 text-sm font-semibold text-indigo-700 dark:border-indigo-900 dark:bg-indigo-950 dark:text-indigo-300">
-          Adaptive learning as an API
-        </p>
-        <h1 className="mx-auto max-w-3xl text-4xl font-extrabold tracking-tight sm:text-6xl">
-          What should this learner practise{" "}
-          <span className="bg-gradient-to-r from-indigo-500 to-violet-500 bg-clip-text text-transparent">
-            next?
-          </span>
-        </h1>
-        <p className="mx-auto mt-6 max-w-2xl text-lg text-zinc-600 dark:text-zinc-400">
-          The Adaptive Engine answers that question for any learning product — a
-          math tutor, a language app, a corporate training tool — while your app
-          keeps full ownership of its content, grading, and users.
-        </p>
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link
-            href="/guide"
-            className="rounded-full bg-indigo-600 px-6 py-3 font-bold text-white transition hover:bg-indigo-700"
-          >
-            Integrate your app →
-          </Link>
-          <Link
-            href="/reference"
-            className="rounded-full border-2 border-zinc-300 px-6 py-3 font-bold text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
-          >
-            API Reference
-          </Link>
-        </div>
-        <div className="mx-auto mt-10 max-w-xl text-left">
-          <CodeBlock code={healthSnippet} title="try it right now — no key needed" />
-        </div>
-      </section>
-
-      {/* Practice loop */}
-      <section className="border-t border-zinc-200 py-16 dark:border-zinc-800">
-        <h2 className="text-center text-3xl font-bold">The practice loop</h2>
-        <p className="mx-auto mt-3 max-w-2xl text-center text-zinc-600 dark:text-zinc-400">
-          It replaces a static, one-size-fits-all question sequence with a
-          per-learner loop. Struggling learners get confidence-building material
-          on the skill they just missed; strong learners get pushed harder with
-          periodic review so skills don&apos;t decay.
-        </p>
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {LOOP_STEPS.map((item) => (
-            <div
-              key={item.step}
-              className="rounded-2xl border border-zinc-200 p-5 dark:border-zinc-800"
-            >
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 font-bold text-white">
-                {item.step}
-              </span>
-              <p className="mt-3 text-sm text-zinc-700 dark:text-zinc-300">{item.text}</p>
+    <>
+      <section className="marketing-hero">
+        <div className="hero-grid section-shell">
+          <div className="hero-content">
+            <span className="eyebrow eyebrow-light"><i /> Adaptive learning infrastructure</span>
+            <h1>The intelligence layer for <em>what comes next.</em></h1>
+            <p>Give every learner a path that responds to what they know—without rebuilding your product, moving your content, or handing over learner identity.</p>
+            <div className="hero-buttons">
+              <Link href="/guide" className="button button-lime">Start integrating <span>↗</span></Link>
+              <Link href="/developers" className="button button-ghost">Explore developer hub</Link>
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Feature grid */}
-      <section className="border-t border-zinc-200 py-16 dark:border-zinc-800">
-        <h2 className="text-center text-3xl font-bold">
-          Built to serve more than one product
-        </h2>
-        <div className="mt-10 grid gap-4 sm:grid-cols-2">
-          {FEATURES.map((feature) => (
-            <div
-              key={feature.title}
-              className="rounded-2xl border border-zinc-200 p-6 dark:border-zinc-800"
-            >
-              <span className="text-2xl" aria-hidden>{feature.emoji}</span>
-              <h3 className="mt-2 text-lg font-bold">{feature.title}</h3>
-              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{feature.text}</p>
+            <div className="hero-proof">
+              <span><i>✓</i> Server-to-server API</span>
+              <span><i>✓</i> Content agnostic</span>
+              <span><i>✓</i> Versioned decisions</span>
             </div>
-          ))}
+          </div>
+          <div className="hero-demo"><AdaptiveDemo /></div>
         </div>
-        <p className="mt-6 text-center text-sm text-zinc-500">
-          It is not a quiz platform, a content library, or a learner-facing
-          product — it is invisible infrastructure your product calls
-          server-to-server.
-        </p>
+        <div className="hero-orbit orbit-one" /><div className="hero-orbit orbit-two" />
       </section>
 
-      {/* Algorithm */}
-      <section className="border-t border-zinc-200 py-16 dark:border-zinc-800">
-        <h2 className="text-center text-3xl font-bold">
-          How <code className="rounded bg-zinc-100 px-2 dark:bg-zinc-900">adaptive-v1</code> decides
-        </h2>
-        <div className="mx-auto mt-10 grid max-w-3xl gap-4">
-          <div className="rounded-2xl border border-zinc-200 p-6 dark:border-zinc-800">
-            <h3 className="font-bold">Mastery tracking</h3>
-            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-              Each answer nudges an exponentially weighted moving average per
-              skill toward 1 (correct) or 0 (incorrect). Harder items move
-              mastery up more when answered correctly; easier items move it down
-              more when missed. New skills start at 0.5.
-            </p>
-          </div>
-          <div className="rounded-2xl border border-zinc-200 p-6 dark:border-zinc-800">
-            <h3 className="font-bold">Selection priority</h3>
-            <ol className="mt-2 list-inside list-decimal space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
-              <li>
-                <strong className="text-zinc-800 dark:text-zinc-200">Scaffold</strong> — two consecutive wrong answers? Stay on that
-                skill but drop a difficulty band. Confidence outranks novelty.
-              </li>
-              <li>
-                <strong className="text-zinc-800 dark:text-zinc-200">Weakest skill</strong> — otherwise target the lowest-mastery
-                skill below the 0.8 threshold.
-              </li>
-              <li>
-                <strong className="text-zinc-800 dark:text-zinc-200">Spiral review</strong> — everything above 0.8? Revisit the
-                least-recently-practised skill so it doesn&apos;t decay.
-              </li>
-            </ol>
-          </div>
-          <div className="rounded-2xl border border-zinc-200 p-6 dark:border-zinc-800">
-            <h3 className="font-bold">Traceable &amp; idempotent</h3>
-            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-              Every response carries an <code>algorithmVersion</code>; every
-              recommendation records its reason. Answer events carry your
-              idempotency key, so network retries can never double-count.
-            </p>
+      <section className="audience-strip">
+        <div className="section-shell">
+          <span>One adaptive core for</span>
+          <div><strong>Education apps</strong><i /> <strong>Tutoring</strong><i /> <strong>Assessment</strong><i /> <strong>Training</strong></div>
+        </div>
+      </section>
+
+      <section className="statement-section">
+        <div className="section-shell statement-grid">
+          <span className="eyebrow">The product</span>
+          <div><h2>Your application already knows how to teach. We help it decide.</h2><p>Adaptive Engine sits behind your product as a focused recommendation service. Your backend asks for an item ID, your application teaches and grades it, then the outcome updates the learner model before the next decision.</p></div>
+        </div>
+      </section>
+
+      <section id="how-it-works" className="workflow-section">
+        <div className="section-shell">
+          <div className="section-heading"><div><span className="eyebrow">A four-step loop</span><h2>One answer changes the next decision.</h2></div><p>The API handles selection and learner state. Your product remains the system of engagement.</p></div>
+          <div className="workflow-grid">
+            {[
+              ["01", "Request", "Send an opaque learner ID plus the skills or grade band eligible for this session."],
+              ["02", "Recommend", "The engine selects an item using mastery, difficulty, recency, and error recovery."],
+              ["03", "Teach", "Your product retrieves the item, renders the experience, and grades the answer."],
+              ["04", "Adapt", "Post correct or incorrect. Mastery updates once, and the next recommendation responds."],
+            ].map(([number, title, text]) => <article key={number}><span>{number}</span><div className="workflow-mark"><i /></div><h3>{title}</h3><p>{text}</p></article>)}
           </div>
         </div>
       </section>
 
-      {/* Architecture */}
-      <section className="border-t border-zinc-200 py-16 dark:border-zinc-800">
-        <h2 className="text-center text-3xl font-bold">Architecture</h2>
-        <div className="mt-10">
-          <ArchitectureDiagram />
+      <section className="capability-section">
+        <div className="section-shell">
+          <div className="section-heading light"><div><span className="eyebrow eyebrow-light">Capabilities</span><h2>Built for real learning loops—not static personalization theatre.</h2></div><p>A small, composable API surface with the controls required to operate it responsibly.</p></div>
+          <div className="capability-grid">{capabilities.map((capability) => <article key={capability.code}><span>{capability.code}</span><h3>{capability.title}</h3><p>{capability.text}</p><i>↗</i></article>)}</div>
         </div>
       </section>
 
-      {/* Quickstart */}
-      <section className="border-t border-zinc-200 py-16 dark:border-zinc-800">
-        <h2 className="text-center text-3xl font-bold">Quickstart</h2>
-        <p className="mx-auto mt-3 max-w-2xl text-center text-zinc-600 dark:text-zinc-400">
-          Three calls wire the whole loop. Content and answer keys never leave
-          your app.
-        </p>
-        <div className="mx-auto mt-10 flex max-w-3xl flex-col gap-6">
-          <CodeBlock code={putItemSnippet} title="1 — register item metadata" />
-          <CodeBlock code={nextItemSnippet} title="2 — ask for the next item" />
-          <CodeBlock code={postEventSnippet} title="3 — report the graded outcome" />
+      <section className="data-boundary-section">
+        <div className="section-shell boundary-grid">
+          <div className="boundary-copy"><span className="eyebrow">A deliberate data boundary</span><h2>Personalization without taking custody of your product.</h2><p>The service only needs enough information to learn from outcomes and recommend item IDs. Everything that makes your experience yours stays in your environment.</p><Link href="/security" className="inline-link">Explore security architecture <span>→</span></Link></div>
+          <div className="boundary-board">
+            <div className="boundary-column sent"><span>You send</span><strong>Opaque learner ID</strong><strong>Item ID + skill</strong><strong>Difficulty 1–5</strong><strong>Correct / incorrect</strong><strong>Idempotency key</strong></div>
+            <div className="boundary-line"><i>API</i></div>
+            <div className="boundary-column kept"><span>You keep</span><strong>Learner name + email</strong><strong>Question content</strong><strong>Answer keys</strong><strong>Media and curriculum IP</strong><strong>Authentication</strong></div>
+          </div>
         </div>
       </section>
 
-      {/* API surface */}
-      <section className="border-t border-zinc-200 py-16 dark:border-zinc-800">
-        <h2 className="text-center text-3xl font-bold">The whole API surface</h2>
-        <div className="mx-auto mt-10 max-w-3xl overflow-x-auto rounded-2xl border border-zinc-200 dark:border-zinc-800">
-          <table className="w-full text-left text-sm">
-            <tbody>
-              {ENDPOINTS.map(([endpoint, purpose]) => (
-                <tr key={endpoint} className="border-b border-zinc-200 last:border-0 dark:border-zinc-800">
-                  <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-indigo-600 dark:text-indigo-400">
-                    <Link href="/reference" className="hover:underline">{endpoint}</Link>
-                  </td>
-                  <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">{purpose}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <section className="solutions-preview">
+        <div className="section-shell">
+          <div className="section-heading"><div><span className="eyebrow">Use cases</span><h2>One engine. Different learning products.</h2></div><Link href="/solutions" className="inline-link">View all solutions <span>→</span></Link></div>
+          <div className="audience-grid">{audiences.map((audience) => <article key={audience.number}><span>{audience.number}</span><h3>{audience.title}</h3><p>{audience.text}</p></article>)}</div>
         </div>
-        <p className="mt-6 text-center">
-          <Link href="/reference" className="font-semibold text-indigo-600 hover:underline dark:text-indigo-400">
-            Explore the interactive API reference →
-          </Link>
-        </p>
       </section>
-    </div>
+
+      <section className="developer-preview">
+        <div className="section-shell developer-preview-grid">
+          <div><span className="eyebrow eyebrow-light">Developer experience</span><h2>From empty tenant to first recommendation in three calls.</h2><p>Use cURL today. Generate a client from the OpenAPI contract tomorrow. The integration is ordinary HTTPS, documented failure behaviour, and no browser-side secret.</p><div className="hero-buttons"><Link href="/developers" className="button button-lime">Open developer hub</Link><Link href="/reference" className="button button-ghost">API reference</Link></div></div>
+          <CodeBlock code={nextItemSnippet} title="request the next item" />
+        </div>
+      </section>
+
+      <section className="final-cta">
+        <div className="section-shell"><span className="eyebrow">Build the learning loop</span><h2>Your content. Your experience. A smarter next step.</h2><p>Start with the integration guide, explore the live API contract, and add adaptive sequencing behind your existing product.</p><div><Link href="/guide" className="button button-dark">Read the integration guide <span>↗</span></Link><Link href="/reference" className="inline-link">View API reference →</Link></div></div>
+      </section>
+    </>
   );
 }

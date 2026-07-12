@@ -16,11 +16,16 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Adaptive Engine — adaptive learning as an API",
+    default: "Adaptive Engine — the intelligence layer for learning products",
     template: "%s | Adaptive Engine",
   },
   description:
-    "A multi-tenant, content-agnostic API that answers one question for every learner, at every moment: what should this learner practise next?",
+    "Adaptive-learning infrastructure that helps education, tutoring, assessment, and training products decide what every learner should practise next.",
+  openGraph: {
+    title: "Adaptive Engine — the intelligence layer for what comes next",
+    description: "Add adaptive sequencing without moving your content, answer keys, or learner identity.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -33,7 +38,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
+      <body className="site-body">
         <Nav />
         <main className="flex-1">{children}</main>
         <Footer />

@@ -1,26 +1,31 @@
 import Link from "next/link";
 import { API_BASE_URL, GITHUB_URL } from "@/lib/snippets";
 
+const groups = [
+  { title: "Product", links: [["Solutions", "/solutions"], ["Security", "/security"], ["How it works", "/#how-it-works"]] },
+  { title: "Developers", links: [["Developer hub", "/developers"], ["Integration guide", "/guide"], ["API reference", "/reference"], ["OpenAPI spec", "/openapi.yaml"]] },
+  { title: "Resources", links: [["GitHub", GITHUB_URL], ["API status", `${API_BASE_URL}/health/live`], ["Architecture", "/developers#architecture"]] },
+];
+
 export function Footer() {
   return (
-    <footer className="border-t border-zinc-200 dark:border-zinc-800">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-2 px-4 py-8 text-sm text-zinc-500 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-        <p>
-          Adaptive Engine — invisible adaptive-learning infrastructure.
-          Stores no names, no emails, no question content.
-        </p>
-        <div className="flex gap-4">
-          <a href={`${API_BASE_URL}/health/live`} target="_blank" rel="noreferrer" className="hover:text-zinc-800 dark:hover:text-zinc-200">
-            API status
-          </a>
-          <Link href="/reference" className="hover:text-zinc-800 dark:hover:text-zinc-200">
-            Reference
+    <footer className="site-footer">
+      <div className="footer-shell">
+        <div className="footer-brand">
+          <Link href="/" className="brand brand-light">
+            <span className="brand-symbol"><i /><i /><i /></span>
+            <span><strong>Adaptive</strong><small>Engine</small></span>
           </Link>
-          <a href={GITHUB_URL} target="_blank" rel="noreferrer" className="hover:text-zinc-800 dark:hover:text-zinc-200">
-            GitHub
-          </a>
+          <p>Adaptive-learning infrastructure for products that want personalization without surrendering content, identity, or control.</p>
+          <span className="footer-status"><i /> API documentation available</span>
+        </div>
+        <div className="footer-links">
+          {groups.map((group) => (
+            <div key={group.title}><strong>{group.title}</strong>{group.links.map(([label, href]) => <a key={href} href={href}>{label}</a>)}</div>
+          ))}
         </div>
       </div>
+      <div className="footer-bottom"><span>© {new Date().getFullYear()} Opyjo Consulting Inc.</span><span>Built in Canada · Designed for server-to-server integration</span></div>
     </footer>
   );
 }

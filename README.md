@@ -1,32 +1,35 @@
-# Adaptive Engine — marketing & developer docs site
+# Adaptive Engine marketing and developer site
 
-The public front door for the [Adaptive Engine](https://github.com/opyjo/adaptive-engine)
-API. Three pages, fully static, zero runtime dependencies beyond Next.js:
+The public product and developer experience for the Adaptive Engine API.
 
-- `/` — landing page: what the engine is, the practice loop, the `adaptive-v1`
-  algorithm, architecture, and a copy-paste quickstart
-- `/reference` — interactive API reference rendered by
-  [Scalar](https://scalar.com) (loaded from CDN) from `public/openapi.yaml`
-- `/guide` — step-by-step integration guide (tenant keys → identifier mapping →
-  item sync → practice loop → failure handling → shadow-mode rollout)
+## Routes
 
-## Develop
+- `/` — product marketing, interactive policy simulation, capabilities, data
+  boundary, use cases, and developer quickstart
+- `/solutions` — EdTech, tutoring, assessment, and training use cases
+- `/developers` — technical quickstart, architecture, endpoint surface, and
+  reliability guidance
+- `/security` — data boundary, implemented controls, and production operations
+- `/guide` — complete integration and rollout guide
+- `/reference` — interactive API reference generated from `openapi.yaml`
+
+## Development
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Keeping the API spec in sync
-
-`public/openapi.yaml` is a **copy** of `../adaptive-engine/openapi.yaml` with
-`servers:` pointed at production. When the engine's API changes, re-run:
+## Validation
 
 ```bash
-npm run sync:openapi
+npm run build
+npm run lint
+npm test
+npm audit --omit=dev
 ```
 
-## Deploy
+## API contract
 
-Deployed as its own service on Railway (Railpack auto-detects Next.js). Vercel
-works with zero config as an alternative.
+`public/openapi.yaml` is synchronized from the standalone service repository.
+Run `npm run sync:openapi` whenever the service contract changes.

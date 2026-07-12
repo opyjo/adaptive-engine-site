@@ -1,36 +1,42 @@
+"use client";
+
 import Link from "next/link";
-import { GITHUB_URL } from "@/lib/snippets";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+
+const links = [
+  { href: "/solutions", label: "Solutions" },
+  { href: "/developers", label: "Developers" },
+  { href: "/security", label: "Security" },
+  { href: "/guide", label: "Integration guide" },
+  { href: "/reference", label: "API reference" },
+];
 
 export function Nav() {
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+
   return (
-    <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/80 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/80">
-      <nav className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between gap-4 px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2 font-bold tracking-tight">
-          <span className="text-indigo-500" aria-hidden>◆</span>
-          Adaptive Engine
+    <header className="site-header">
+      <nav className="nav-shell" aria-label="Primary navigation">
+        <Link href="/" className="brand" onClick={() => setOpen(false)}>
+          <span className="brand-symbol"><i /><i /><i /></span>
+          <span><strong>Adaptive</strong><small>Engine</small></span>
         </Link>
-        <div className="flex items-center gap-1 text-sm font-medium sm:gap-2">
-          <Link
-            href="/reference"
-            className="rounded-lg px-2 py-1.5 text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 sm:px-3 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
-          >
-            API Reference
-          </Link>
-          <Link
-            href="/guide"
-            className="rounded-lg px-2 py-1.5 text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 sm:px-3 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
-          >
-            Integration Guide
-          </Link>
-          <a
-            href={GITHUB_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="rounded-lg px-2 py-1.5 text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900 sm:px-3 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
-          >
-            GitHub ↗
-          </a>
+
+        <button className="mobile-toggle" onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-label="Toggle navigation">
+          <span /><span />
+        </button>
+
+        <div className={`nav-links ${open ? "open" : ""}`}>
+          {links.map((link) => (
+            <Link key={link.href} href={link.href} className={pathname === link.href ? "active" : ""} onClick={() => setOpen(false)}>
+              {link.label}
+            </Link>
+          ))}
         </div>
+
+        <Link href="/guide" className="nav-cta">Start building <span>↗</span></Link>
       </nav>
     </header>
   );
