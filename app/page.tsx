@@ -29,7 +29,7 @@ export default function Home() {
             <h1>The intelligence layer for <em>what comes next.</em></h1>
             <p>Give every learner a path that responds to what they know—without rebuilding your product, moving your content, or handing over learner identity.</p>
             <div className="hero-buttons">
-              <Link href="/guide" className="button button-lime">Start integrating <span>↗</span></Link>
+              <Link href="/design-partner" className="button button-lime">Request design-partner access <span>↗</span></Link>
               <Link href="/developers" className="button button-ghost">Explore developer hub</Link>
             </div>
             <div className="hero-proof">
@@ -104,7 +104,7 @@ export default function Home() {
       </section>
 
       <section className="final-cta">
-        <div className="section-shell"><span className="eyebrow">Build the learning loop</span><h2>Your content. Your experience. A smarter next step.</h2><p>Start with the integration guide, explore the live API contract, and add adaptive sequencing behind your existing product.</p><div><Link href="/guide" className="button button-dark">Read the integration guide <span>↗</span></Link><Link href="/reference" className="inline-link">View API reference →</Link></div></div>
+        <div className="section-shell"><span className="eyebrow">Build the learning loop</span><h2>Your content. Your experience. A smarter next step.</h2><p>Apply for the design-partner programme or start with the technical guide and API contract.</p><div><Link href="/design-partner" className="button button-dark">Request access <span>↗</span></Link><Link href="/guide" className="inline-link">Read integration guide →</Link></div></div>
       </section>
     </>
   );

@@ -6,9 +6,9 @@ import { useState } from "react";
 
 const links = [
   { href: "/solutions", label: "Solutions" },
+  { href: "/pricing", label: "Pricing" },
   { href: "/developers", label: "Developers" },
   { href: "/security", label: "Security" },
-  { href: "/guide", label: "Integration guide" },
   { href: "/reference", label: "API reference" },
 ];
 
@@ -36,7 +36,7 @@ export function Nav() {
           ))}
         </div>
 
-        <Link href="/guide" className="nav-cta">Start building <span>↗</span></Link>
+        <Link href="/design-partner" className="nav-cta">Request access <span>↗</span></Link>
       </nav>
     </header>
   );

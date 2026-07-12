@@ -24,3 +24,31 @@ export const postEventSnippet = `curl -X POST ${API_BASE_URL}/v1/learners/learne
     "itemId": "math-g4-fractions-001",
     "correct": true
   }'`;
+
+export const typescriptClientSnippet = `type NextItem = {
+  decisionId: string;
+  itemId: string;
+  skill: string;
+  reason: "weakest-skill" | "scaffold" | "spiral-review" | "fallback";
+  algorithmVersion: string;
+};
+
+export class AdaptiveEngineClient {
+  constructor(
+    private readonly apiKey: string,
+    private readonly baseUrl = "${API_BASE_URL}",
+  ) {}
+
+  async nextItem(learnerId: string, gradeBand?: string): Promise<NextItem> {
+    const query = new URLSearchParams();
+    if (gradeBand) query.set("gradeBand", gradeBand);
+
+    const response = await fetch(
+      \`\${this.baseUrl}/v1/learners/\${encodeURIComponent(learnerId)}/next-item?\${query}\`,
+      { headers: { Authorization: \`Bearer \${this.apiKey}\` } },
+    );
+
+    if (!response.ok) throw new Error(\`Adaptive Engine returned \${response.status}\`);
+    return response.json() as Promise<NextItem>;
+  }
+}`;

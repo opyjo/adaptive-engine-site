@@ -2,7 +2,7 @@ import Link from "next/link";
 import { API_BASE_URL, GITHUB_URL } from "@/lib/snippets";
 
 const groups = [
-  { title: "Product", links: [["Solutions", "/solutions"], ["Security", "/security"], ["How it works", "/#how-it-works"]] },
+  { title: "Product", links: [["Solutions", "/solutions"], ["Pricing", "/pricing"], ["Security", "/security"], ["Request access", "/design-partner"]] },
   { title: "Developers", links: [["Developer hub", "/developers"], ["Integration guide", "/guide"], ["API reference", "/reference"], ["OpenAPI spec", "/openapi.yaml"]] },
   { title: "Resources", links: [["GitHub", GITHUB_URL], ["API status", `${API_BASE_URL}/health/live`], ["Architecture", "/developers#architecture"]] },
 ];

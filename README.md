@@ -7,6 +7,8 @@ The public product and developer experience for the Adaptive Engine API.
 - `/` — product marketing, interactive policy simulation, capabilities, data
   boundary, use cases, and developer quickstart
 - `/solutions` — EdTech, tutoring, assessment, and training use cases
+- `/pricing` — evaluation, design-partner, growth, and enterprise model
+- `/design-partner` — pilot application and conversion flow
 - `/developers` — technical quickstart, architecture, endpoint surface, and
   reliability guidance
 - `/security` — data boundary, implemented controls, and production operations
@@ -33,3 +35,16 @@ npm audit --omit=dev
 
 `public/openapi.yaml` is synchronized from the standalone service repository.
 Run `npm run sync:openapi` whenever the service contract changes.
+
+## Design-partner applications
+
+The application form sends email through the Resend HTTP API. Configure:
+
+```env
+RESEND_API_KEY=...
+DESIGN_PARTNER_TO_EMAIL=partnerships@your-domain.ca
+DESIGN_PARTNER_FROM_EMAIL=Adaptive Engine <applications@your-domain.ca>
+```
+
+Until these variables are configured, the form returns a clear temporary-
+unavailable response and does not pretend an application was accepted.

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CodeBlock } from "@/components/code-block";
 import { PageHero } from "@/components/page-hero";
-import { healthSnippet, nextItemSnippet, postEventSnippet, putItemSnippet } from "@/lib/snippets";
+import { healthSnippet, nextItemSnippet, postEventSnippet, putItemSnippet, typescriptClientSnippet } from "@/lib/snippets";
 
 export const metadata: Metadata = { title: "Developer Hub", description: "Technical architecture, quickstart, API lifecycle, failure handling, and integration resources for Adaptive Engine." };
 
@@ -25,6 +25,8 @@ export default function DevelopersPage() {
       <div className="section-heading"><div><span className="eyebrow">Quickstart</span><h2>Three calls complete the loop.</h2></div><p>Provision a test key, register metadata, ask for an item, and post the outcome after your application grades it.</p></div>
       <div className="quickstart-stack"><div className="quickstart-step"><span>01</span><div><h3>Check service availability</h3><p>Health endpoints require no API key.</p><CodeBlock code={healthSnippet} title="health check" /></div></div><div className="quickstart-step"><span>02</span><div><h3>Register item metadata</h3><p>Content and answer keys never cross the boundary.</p><CodeBlock code={putItemSnippet} title="upsert item" /></div></div><div className="quickstart-step"><span>03</span><div><h3>Request a recommendation</h3><p>Scope the bank by grade band or eligible skills.</p><CodeBlock code={nextItemSnippet} title="next item" /></div></div><div className="quickstart-step"><span>04</span><div><h3>Post the graded outcome</h3><p>Reuse the same idempotency key whenever a network retry occurs.</p><CodeBlock code={postEventSnippet} title="answer event" /></div></div></div>
     </div></section>
+
+    <section className="typescript-section"><div className="section-shell typescript-grid"><div><span className="eyebrow">TypeScript starter</span><h2>A typed wrapper you can own today.</h2><p>The API is OpenAPI-first, so you can generate a client or keep a small explicit wrapper in your backend. This example demonstrates the shape without claiming a published SDK that does not exist yet.</p><div className="typescript-points"><span>✓ Server-side environment only</span><span>✓ Typed recommendation result</span><span>✓ Encoded learner identifier</span><span>✓ Explicit non-2xx handling</span></div><Link href="/openapi.yaml" className="inline-link">Generate from OpenAPI ↗</Link></div><CodeBlock code={typescriptClientSnippet} title="adaptive-engine-client.ts" /></div></section>
 
     <section id="architecture" className="architecture-section"><div className="section-shell">
       <div className="section-heading light"><div><span className="eyebrow eyebrow-light">Architecture</span><h2>Your backend is the trust broker.</h2></div><p>The browser never receives an engine key and never calls the service directly.</p></div>
