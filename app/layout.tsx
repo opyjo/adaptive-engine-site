@@ -20,10 +20,10 @@ export const metadata: Metadata = {
     template: "%s | Adaptive Engine",
   },
   description:
-    "Canadian adaptive-learning infrastructure for EdTech companies and educational publishers, beginning with Ontario Grades 1–8 mathematics.",
+    "Adaptive-learning infrastructure that helps education, tutoring, assessment, and training products decide what every learner should practise next.",
   openGraph: {
     title: "Adaptive Engine — the intelligence layer for what comes next",
-    description: "Ontario-aligned adaptive intelligence without moving your content, answer keys, or learner identity.",
+    description: "Add adaptive sequencing without moving your content, answer keys, or learner identity.",
     type: "website",
   },
 };
