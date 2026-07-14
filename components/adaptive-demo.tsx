@@ -2,55 +2,34 @@
 
 import { useState } from "react";
 
-type Event = { label: string; outcome: "correct" | "incorrect"; mastery: number };
-
-function nextMastery(current: number, correct: boolean, difficulty = 2) {
-  const outcome = correct ? 1 : 0;
-  const weight = correct ? 1 + 0.2 * (difficulty - 3) : 1 - 0.2 * (difficulty - 3);
-  return Math.max(0, Math.min(1, current + 0.15 * weight * (outcome - current)));
-}
+const concepts = [
+  { name: "Whole numbers", value: 91, state: "strong" },
+  { name: "Equivalent fractions", value: 78, state: "ready" },
+  { name: "Compare fractions", value: 54, state: "focus" },
+  { name: "Decimal tenths", value: 36, state: "later" },
+];
 
 export function AdaptiveDemo() {
-  const [mastery, setMastery] = useState(0.5);
-  const [wrong, setWrong] = useState(0);
-  const [events, setEvents] = useState<Event[]>([]);
+  const [diagnostic, setDiagnostic] = useState(false);
+  const [confidence, setConfidence] = useState(86);
 
-  function answer(correct: boolean) {
-    const updated = nextMastery(mastery, correct);
-    setMastery(updated);
-    setWrong(correct ? 0 : wrong + 1);
-    setEvents((current) => [...current.slice(-2), { label: `Attempt ${current.length + 1}`, outcome: correct ? "correct" : "incorrect", mastery: updated }]);
+  function adapt() {
+    setDiagnostic(true);
+    setConfidence((value) => value === 92 ? 86 : 92);
   }
-
-  function reset() {
-    setMastery(0.5); setWrong(0); setEvents([]);
-  }
-
-  const scaffold = wrong >= 2;
-  const reason = scaffold ? "scaffold" : mastery < 0.8 ? "weakest-skill" : "spiral-review";
-  const difficulty = scaffold ? 1 : mastery < 0.55 ? 2 : mastery < 0.8 ? 3 : 4;
 
   return (
-    <div className="demo-card">
-      <div className="demo-topbar"><span><i /> Live policy simulation</span><button onClick={reset}>Reset</button></div>
-      <div className="demo-learner">
-        <div className="demo-avatar">A</div>
-        <div><small>Opaque learner</small><strong>learner_8f21</strong></div>
-        <span className="demo-grade">Grade 4 · Mathematics</span>
+    <div className="ae-engine-visual" aria-label="Interactive learner model preview">
+      <div className="ae-visual-top"><span><i /> Learner model</span><small>ONT-MATH-2020 · GRADE 4</small></div>
+      <div className="ae-visual-profile"><div><span>LP</span></div><p><small>PSEUDONYMOUS LEARNER</small><strong>learner_ca_0248</strong></p><b>LIVE</b></div>
+      <div className="ae-visual-main">
+        <div className="ae-knowledge-map">
+          <div className="ae-map-head"><span>Knowledge map</span><small>4 concepts in scope</small></div>
+          {concepts.map((concept, index) => <button type="button" onClick={adapt} className={`ae-concept-row ${concept.state}`} key={concept.name}><i>{index + 1}</i><span>{concept.name}<small>{concept.state === "focus" ? "Prerequisite gap detected" : "Concept mastery"}</small></span><b>{diagnostic && concept.state === "focus" ? 61 : concept.value}%</b></button>)}
+        </div>
+        <div className="ae-next-action"><small>NEXT BEST ACTION</small><div><span>↳</span><p><strong>{diagnostic ? "Targeted remediation" : "Diagnostic check"}</strong><small>{diagnostic ? "Equivalent fractions · visual model" : "Compare fractions · difficulty 2/5"}</small></p></div><footer><span>CONFIDENCE <b>{confidence}%</b></span><button type="button" onClick={adapt}>{diagnostic ? "Re-evaluate" : "Simulate event"} →</button></footer></div>
       </div>
-      <div className="demo-skill">
-        <div><small>Current skill</small><strong>Division facts</strong></div>
-        <div className="mastery-value"><small>Mastery</small><strong>{mastery.toFixed(2)}</strong></div>
-      </div>
-      <div className="mastery-track"><span style={{ width: `${mastery * 100}%` }} /></div>
-      <div className="demo-decision">
-        <div><span>Next item</span><strong>{scaffold ? "division-easy-012" : "division-practice-027"}</strong></div>
-        <div><span>Difficulty</span><strong>{difficulty} / 5</strong></div>
-        <div><span>Reason</span><strong className={scaffold ? "alert" : ""}>{reason}</strong></div>
-      </div>
-      {events.length > 0 && <div className="demo-events">{events.map((event, index) => <span key={`${event.label}-${index}`} className={event.outcome}>{event.outcome === "correct" ? "✓" : "×"} {event.mastery.toFixed(2)}</span>)}</div>}
-      <div className="demo-actions"><button onClick={() => answer(false)}>Simulate incorrect</button><button onClick={() => answer(true)}>Simulate correct</button></div>
-      <p>Try two incorrect answers. The engine stays on the same skill and lowers difficulty to rebuild confidence.</p>
+      <div className="ae-visual-foot"><span><i /> Recommendation explained</span><span>model_ca_bkt_0.4</span></div>
     </div>
   );
 }

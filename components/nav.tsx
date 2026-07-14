@@ -5,11 +5,11 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 const links = [
+  { href: "/solutions", label: "Platform" },
   { href: "/solutions", label: "Solutions" },
-  { href: "/pricing", label: "Pricing" },
   { href: "/developers", label: "Developers" },
-  { href: "/security", label: "Security" },
-  { href: "/reference", label: "API reference" },
+  { href: "/security", label: "Trust" },
+  { href: "/guide", label: "Resources" },
 ];
 
 export function Nav() {
@@ -36,7 +36,7 @@ export function Nav() {
           ))}
         </div>
 
-        <Link href="/design-partner" className="nav-cta">Request access <span>↗</span></Link>
+        <Link href="/design-partner" className="nav-cta">Talk to us <span>↗</span></Link>
       </nav>
     </header>
   );
